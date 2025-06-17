@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Генератор случайных чисел</title>
+<title>Генератор случайных чисел — Барабан</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-  
+
   * {
     box-sizing: border-box;
   }
@@ -25,7 +25,7 @@
   .container {
     background: rgba(255 255 255 / 0.1);
     backdrop-filter: blur(10px);
-    border-radius: 20px;
+    border-radius: 24px;
     padding: 40px 50px;
     width: 320px;
     box-shadow: 0 15px 30px rgba(0,0,0,0.3);
@@ -86,17 +86,33 @@
     transform: scale(0.98);
   }
 
+  /* Круглый барабан */
   #result {
-    margin-top: 40px;
-    font-size: 4.8rem;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-shadow:
-      0 0 10px #fff,
-      0 0 20px #ffdd88,
-      0 0 40px #ffdd88,
-      0 0 80px #ffdd88;
-    transition: transform 0.3s ease;
+    margin: 40px auto 0;
+    width: 140px;
+    height: 140px;
+    line-height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, #ffdd88 40%, #d9b84a 100%);
+    color: #4a3c1a;
+    font-size: 4.5rem;
+    font-weight: 800;
+    text-align: center;
+    user-select: none;
+    box-shadow:
+      inset 0 0 10px #fff9cc,
+      0 0 15px #ffdd88,
+      0 8px 15px rgba(0,0,0,0.2);
+    transition: transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  }
+
+  #result.spinning {
+    animation: spin 1s ease-out;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(720deg); }
   }
 
   #history {
@@ -106,7 +122,6 @@
     color: #ffeaa7;
     letter-spacing: 1px;
   }
-
 </style>
 </head>
 <body>
@@ -158,15 +173,17 @@
         return;
       }
 
-      // Анимация эффекта увеличения числа
-      resultEl.style.transform = 'scale(1.3)';
-      setTimeout(() => {
-        resultEl.style.transform = 'scale(1)';
-      }, 300);
+      // Запускаем анимацию вращения
+      resultEl.classList.add('spinning');
 
-      const num = getRandomInt(min, max);
-      resultEl.textContent = num;
-      updateHistory(num);
+      setTimeout(() => {
+        const num = getRandomInt(min, max);
+        resultEl.textContent = num;
+        updateHistory(num);
+
+        // Останавливаем анимацию
+        resultEl.classList.remove('spinning');
+      }, 1000); // анимация длится 1 секунду
     });
   </script>
 
