@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Вращающийся 3D цилиндр с цифрами</title>
+<title>Генератор случайных чисел</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
 
@@ -13,115 +13,139 @@
     font-family: 'Montserrat', sans-serif;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     color: #fff;
     user-select: none;
   }
 
-  #score {
-    font-size: 2rem;
+  h1 {
     margin-bottom: 20px;
-    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-shadow: 0 0 8px rgba(0,0,0,0.5);
   }
 
-  .cylinder-container {
-    perspective: 1200px;
-    width: 200px;
-    height: 200px;
-    position: relative;
-  }
-
-  .cylinder {
-    width: 150px;
-    height: 150px;
-    position: absolute;
-    top: 25px;
-    left: 25px;
-    transform-style: preserve-3d;
-    animation: spin 8s linear infinite;
-  }
-
-  @keyframes spin {
-    from { transform: rotateX(0deg) rotateY(0deg); }
-    to { transform: rotateX(360deg) rotateY(360deg); }
-  }
-
-  .face {
-    position: absolute;
-    width: 100px;
-    height: 40px;
-    left: 25px;
-    top: 55px;
-    background: linear-gradient(135deg, #f6d365, #fda085);
+  .generator {
+    background: rgba(255 255 255 / 0.15);
+    padding: 30px 40px;
     border-radius: 20px;
-    box-shadow:
-      inset 0 0 10px #fff8cc,
-      0 6px 15px rgba(253, 160, 133, 0.7);
+    box-shadow: 0 0 30px rgba(0,0,0,0.3);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    width: 320px;
+  }
+
+  label {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  input[type=number] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    outline: none;
+  }
+
+  button {
+    padding: 15px 25px;
+    font-size: 1.2rem;
     font-weight: 700;
-    font-size: 1.5rem;
-    color: #4a2c00;
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
-
-  .face:hover {
-    background: linear-gradient(135deg, #fbd786, #f7797d);
-    transform: scale(1.1);
-  }
-
-  .face.active {
+    border: none;
+    border-radius: 15px;
     background: #ffce00;
     color: #3a2600;
-    transform: scale(1.3);
-    box-shadow: 0 0 15px #ffce00;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(255,206,0,0.6);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
   }
+
+  button:hover {
+    background: #ffd832;
+    box-shadow: 0 8px 20px rgba(255,216,50,0.8);
+  }
+
+  #result {
+    margin-top: 30px;
+    font-size: 3rem;
+    font-weight: 900;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-shadow: 0 0 15px #ffd832;
+    min-width: 140px;
+  }
+
+  /* Анимация появления результата */
+  .animate {
+    animation: pop 0.4s ease forwards;
+  }
+
+  @keyframes pop {
+    0% {
+      transform: scale(0.5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
 </style>
 </head>
 <body>
 
-  <div id="score">Очки: 0</div>
+<h1>Генератор случайных чисел</h1>
+<div class="generator">
+  <label for="min">Минимум</label>
+  <input type="number" id="min" value="1" />
+  
+  <label for="max">Максимум</label>
+  <input type="number" id="max" value="100" />
 
-  <div class="cylinder-container">
-    <div class="cylinder" id="cylinder"></div>
-  </div>
+  <button id="generateBtn">Сгенерировать</button>
+
+  <div id="result">-</div>
+</div>
 
 <script>
-  const cylinder = document.getElementById('cylinder');
-  const scoreDisplay = document.getElementById('score');
-  let score = 0;
-  let activeFace = null;
+  const minInput = document.getElementById('min');
+  const maxInput = document.getElementById('max');
+  const generateBtn = document.getElementById('generateBtn');
+  const result = document.getElementById('result');
 
-  // Числа для цилиндра
-  const numbers = [1,2,3,4,5,6,7,8];
-  const facesCount = numbers.length;
-  const radius = 80; // радиус цилиндра по кругу
-  const angleStep = 360 / facesCount;
+  generateBtn.addEventListener('click', () => {
+    let min = parseInt(minInput.value);
+    let max = parseInt(maxInput.value);
 
-  // Создаем грани цилиндра с цифрами
-  numbers.forEach((num, i) => {
-    const face = document.createElement('div');
-    face.classList.add('face');
-    face.textContent = num;
+    if (isNaN(min) || isNaN(max)) {
+      alert('Пожалуйста, введите корректные числа');
+      return;
+    }
 
-    // Позиционируем грань по кругу по оси Y
-    const rotateY = i * angleStep;
-    face.style.transform = `rotateY(${rotateY}deg) translateZ(${radius}px)`;
-    
-    // Клик на грань
-    face.addEventListener('click', () => {
-      if (activeFace) activeFace.classList.remove('active');
-      face.classList.add('active');
-      activeFace = face;
-      score += num;
-      scoreDisplay.textContent = `Очки: ${score}`;
-    });
+    if (min > max) {
+      [min, max] = [max, min]; // поменять местами если ошиблись
+    }
 
-    cylinder.appendChild(face);
+    // Анимация кручения цифр перед результатом
+    let iterations = 15;
+    let current = 0;
+
+    const interval = setInterval(() => {
+      const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+      result.textContent = randomNum;
+      result.classList.add('animate');
+      setTimeout(() => result.classList.remove('animate'), 300);
+      current++;
+      if (current >= iterations) clearInterval(interval);
+    }, 50);
   });
 </script>
 
