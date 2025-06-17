@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Генератор случайных чисел</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Poppins', sans-serif;
+    color: #fff;
+  }
+
+  .container {
+    background: rgba(255 255 255 / 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px 50px;
+    width: 320px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    text-align: center;
+  }
+
+  h1 {
+    margin-bottom: 25px;
+    font-weight: 600;
+    font-size: 1.8rem;
+    letter-spacing: 1.2px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+
+  .inputs {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  input[type=number] {
+    width: 80px;
+    padding: 12px 10px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 600;
+    background: rgba(255 255 255 / 0.2);
+    color: #fff;
+    transition: background 0.3s ease;
+  }
+  input[type=number]:focus {
+    outline: none;
+    background: rgba(255 255 255 / 0.4);
+    box-shadow: 0 0 8px #ffdd88;
+  }
+
+  button {
+    background: #ffdd88;
+    color: #4a3c1a;
+    font-weight: 700;
+    font-size: 1.25rem;
+    padding: 14px 0;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(255,221,136,0.6);
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  button:hover {
+    background: #ffc94c;
+    transform: scale(1.05);
+  }
+  button:active {
+    transform: scale(0.98);
+  }
+
+  #result {
+    margin-top: 40px;
+    font-size: 4.8rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-shadow:
+      0 0 10px #fff,
+      0 0 20px #ffdd88,
+      0 0 40px #ffdd88,
+      0 0 80px #ffdd88;
+    transition: transform 0.3s ease;
+  }
+
+  #history {
+    margin-top: 20px;
+    font-weight: 500;
+    font-size: 1rem;
+    color: #ffeaa7;
+    letter-spacing: 1px;
+  }
+
+</style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Генератор случайных чисел</h1>
+
+    <div class="inputs">
+      <input type="number" id="min" value="1" min="0" />
+      <input type="number" id="max" value="100" min="1" />
+    </div>
+
+    <button id="generate">Сгенерировать</button>
+
+    <div id="result">-</div>
+    <div id="history">История: -</div>
+  </div>
+
+  <script>
+    const minInput = document.getElementById('min');
+    const maxInput = document.getElementById('max');
+    const generateBtn = document.getElementById('generate');
+    const resultEl = document.getElementById('result');
+    const historyEl = document.getElementById('history');
+    const history = [];
+
+    function getRandomInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function updateHistory(num) {
+      history.unshift(num);
+      if (history.length > 5) history.pop();
+      historyEl.textContent = 'История: ' + history.join(', ');
+    }
+
+    generateBtn.addEventListener('click', () => {
+      let min = parseInt(minInput.value);
+      let max = parseInt(maxInput.value);
+
+      if (isNaN(min) || isNaN(max)) {
+        alert('Введите корректные числа!');
+        return;
+      }
+      if (min > max) {
+        alert('Минимум не может быть больше максимума!');
+        return;
+      }
+
+      // Анимация эффекта увеличения числа
+      resultEl.style.transform = 'scale(1.3)';
+      setTimeout(() => {
+        resultEl.style.transform = 'scale(1)';
+      }, 300);
+
+      const num = getRandomInt(min, max);
+      resultEl.textContent = num;
+      updateHistory(num);
+    });
+  </script>
+
+</body>
+</html>
