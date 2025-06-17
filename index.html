@@ -3,46 +3,37 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Генератор случайных чисел — LED дисплей</title>
+<title>Генератор случайных чисел — Пульсирующий круг</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
 
   body {
     margin: 0;
     height: 100vh;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    background: linear-gradient(135deg, #1f4037, #99f2c8);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Orbitron', monospace;
-    color: #00ffea;
+    font-family: 'Montserrat', sans-serif;
     user-select: none;
   }
 
   .container {
     text-align: center;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 40px 60px;
-    border-radius: 20px;
-    box-shadow:
-      0 0 20px #00fff7,
-      inset 0 0 15px #00fff7;
-    width: 350px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    border-radius: 30px;
+    padding: 50px 60px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.1);
+    width: 320px;
   }
 
   h1 {
     margin-bottom: 30px;
     font-weight: 700;
     font-size: 2.2rem;
-    letter-spacing: 3px;
-    color: #00fff7;
-    text-shadow:
-      0 0 5px #00fff7,
-      0 0 15px #00fff7;
-  }
-
-  .inputs {
-    margin-bottom: 25px;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0,0,0,0.3);
   }
 
   input[type=number] {
@@ -54,87 +45,82 @@
     border: none;
     text-align: center;
     font-weight: 700;
-    font-family: 'Orbitron', monospace;
-    color: #00ffea;
-    background: #041a1d;
-    box-shadow: inset 0 0 10px #00fff7;
+    color: #333;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     transition: box-shadow 0.3s ease;
   }
   input[type=number]:focus {
     outline: none;
-    box-shadow: 0 0 20px #00fff7;
-    background: #0c3e42;
+    box-shadow: 0 0 15px #49d49d;
   }
 
   button {
-    background: #00fff7;
-    color: #004d4d;
+    background: #49d49d;
+    color: #fff;
     font-weight: 700;
     font-size: 1.3rem;
     padding: 14px 0;
     width: 100%;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
-    box-shadow: 0 0 15px #00fff7;
+    box-shadow: 0 8px 20px rgba(73, 212, 157, 0.5);
     transition: background 0.3s ease, transform 0.2s ease;
+    margin-top: 20px;
   }
   button:hover {
-    background: #00d9c7;
+    background: #3abf89;
     transform: scale(1.05);
   }
   button:active {
     transform: scale(0.97);
   }
 
-  /* LED дисплей */
+  /* Пульсирующий круг */
   #result {
     margin: 40px auto 0;
-    font-size: 6rem;
-    letter-spacing: 12px;
-    padding: 15px 30px;
-    width: max-content;
-    border-radius: 15px;
-    background:
-      linear-gradient(180deg, #004d4d, #00fff7 70%);
-    color: #001f1f;
-    text-shadow:
-      0 0 10px #00fff7,
-      0 0 20px #00fff7,
-      0 0 30px #00fff7,
-      0 0 40px #00fff7;
-    font-family: 'Orbitron', monospace;
+    width: 140px;
+    height: 140px;
+    line-height: 140px;
+    border-radius: 50%;
+    font-size: 5rem;
+    font-weight: 900;
+    color: #49d49d;
+    background: rgba(73, 212, 157, 0.2);
     box-shadow:
-      inset 0 0 40px #00fff7,
-      0 0 20px #00fff7;
-    transition: color 0.4s ease;
+      0 0 20px rgba(73, 212, 157, 0.6),
+      inset 0 0 30px rgba(73, 212, 157, 0.4);
+    user-select: none;
+    transition: color 0.4s ease, box-shadow 0.4s ease;
   }
 
-  /* Анимация мигания при смене числа */
-  #result.flash {
-    animation: flashLed 0.6s ease forwards;
+  /* Анимация пульсации */
+  #result.pulse {
+    animation: pulseAnim 0.7s ease;
   }
 
-  @keyframes flashLed {
+  @keyframes pulseAnim {
     0% {
-      color: #00fff7;
-      text-shadow:
-        0 0 20px #00fff7,
-        0 0 40px #00fff7,
-        0 0 60px #00fff7;
+      box-shadow:
+        0 0 20px rgba(73, 212, 157, 0.6),
+        inset 0 0 30px rgba(73, 212, 157, 0.4);
+      color: #49d49d;
+      transform: scale(1);
     }
     50% {
-      color: #00ffd0;
-      text-shadow:
-        0 0 30px #00ffd0,
-        0 0 50px #00ffd0,
-        0 0 70px #00ffd0;
+      box-shadow:
+        0 0 35px rgba(73, 212, 157, 1),
+        inset 0 0 45px rgba(73, 212, 157, 0.7);
+      color: #30b475;
+      transform: scale(1.1);
     }
     100% {
-      color: #001f1f;
-      text-shadow:
-        0 0 10px #00fff7,
-        0 0 20px #00fff7;
+      box-shadow:
+        0 0 20px rgba(73, 212, 157, 0.6),
+        inset 0 0 30px rgba(73, 212, 157, 0.4);
+      color: #49d49d;
+      transform: scale(1);
     }
   }
 
@@ -142,7 +128,7 @@
     margin-top: 25px;
     font-weight: 600;
     font-size: 1rem;
-    color: #00b0a0;
+    color: #c4f0d2;
     letter-spacing: 1.5px;
   }
 </style>
@@ -152,7 +138,7 @@
   <div class="container">
     <h1>Генератор случайных чисел</h1>
 
-    <div class="inputs">
+    <div>
       <input type="number" id="min" value="1" min="0" />
       <input type="number" id="max" value="100" min="1" />
     </div>
@@ -197,20 +183,18 @@
       }
 
       const num = getRandomInt(min, max);
-      
-      // Добавляем анимацию мигания
-      resultEl.classList.add('flash');
 
-      // Меняем число через 300 мс, чтобы совпало с миганием
-      setTimeout(() => {
-        resultEl.textContent = num;
-        updateHistory(num);
-      }, 300);
+      // Добавляем анимацию пульсации
+      resultEl.classList.add('pulse');
+
+      // Меняем число сразу
+      resultEl.textContent = num;
+      updateHistory(num);
 
       // Убираем класс анимации после завершения
       setTimeout(() => {
-        resultEl.classList.remove('flash');
-      }, 600);
+        resultEl.classList.remove('pulse');
+      }, 700);
     });
   </script>
 
