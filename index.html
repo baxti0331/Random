@@ -3,43 +3,58 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Падающие шарики с числами</title>
+<title>Вращающийся 3D цилиндр с цифрами</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
+
   body, html {
     margin: 0; padding: 0; height: 100%;
     background: linear-gradient(135deg, #667eea, #764ba2);
     font-family: 'Montserrat', sans-serif;
-    overflow: hidden;
-    user-select: none;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     color: #fff;
+    user-select: none;
   }
 
   #score {
     font-size: 2rem;
-    margin: 20px 0 10px;
+    margin-bottom: 20px;
     text-shadow: 0 0 10px rgba(0,0,0,0.5);
   }
 
-  #game-area {
+  .cylinder-container {
+    perspective: 1200px;
+    width: 200px;
+    height: 200px;
     position: relative;
-    width: 100vw;
-    height: 80vh;
-    background: radial-gradient(circle at center, #9f7aea 0%, #6b46c1 80%);
-    overflow: hidden;
-    border-radius: 15px;
-    box-shadow: 0 0 30px rgba(0,0,0,0.5);
   }
 
-  .ball {
+  .cylinder {
+    width: 150px;
+    height: 150px;
     position: absolute;
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(145deg, #f6d365, #fda085);
-    border-radius: 50%;
+    top: 25px;
+    left: 25px;
+    transform-style: preserve-3d;
+    animation: spin 8s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotateX(0deg) rotateY(0deg); }
+    to { transform: rotateX(360deg) rotateY(360deg); }
+  }
+
+  .face {
+    position: absolute;
+    width: 100px;
+    height: 40px;
+    left: 25px;
+    top: 55px;
+    background: linear-gradient(135deg, #f6d365, #fda085);
+    border-radius: 20px;
     box-shadow:
       inset 0 0 10px #fff8cc,
       0 6px 15px rgba(253, 160, 133, 0.7);
@@ -51,86 +66,63 @@
     color: #4a2c00;
     cursor: pointer;
     user-select: none;
-    transition: transform 0.2s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease;
   }
 
-  .ball:active {
-    transform: scale(0.9);
+  .face:hover {
+    background: linear-gradient(135deg, #fbd786, #f7797d);
+    transform: scale(1.1);
   }
 
-  #footer {
-    margin-top: 10px;
-    font-size: 1rem;
-    color: #d1c4e9;
-    text-shadow: 0 0 4px rgba(0,0,0,0.3);
+  .face.active {
+    background: #ffce00;
+    color: #3a2600;
+    transform: scale(1.3);
+    box-shadow: 0 0 15px #ffce00;
   }
 </style>
 </head>
 <body>
 
   <div id="score">Очки: 0</div>
-  <div id="game-area"></div>
-  <div id="footer">Кликайте по падающим шарикам чтобы собирать очки!</div>
+
+  <div class="cylinder-container">
+    <div class="cylinder" id="cylinder"></div>
+  </div>
 
 <script>
-  const gameArea = document.getElementById('game-area');
+  const cylinder = document.getElementById('cylinder');
   const scoreDisplay = document.getElementById('score');
-
   let score = 0;
-  let balls = [];
-  let ballId = 0;
+  let activeFace = null;
 
-  // Генерируем шарик с числом и падаем
-  function createBall() {
-    const ball = document.createElement('div');
-    ball.classList.add('ball');
-    ball.dataset.id = ballId++;
-    const number = Math.floor(Math.random() * 10) + 1;
-    ball.textContent = number;
+  // Числа для цилиндра
+  const numbers = [1,2,3,4,5,6,7,8];
+  const facesCount = numbers.length;
+  const radius = 80; // радиус цилиндра по кругу
+  const angleStep = 360 / facesCount;
 
-    // Начальная позиция - случайная по ширине
-    const x = Math.random() * (gameArea.clientWidth - 50);
-    ball.style.left = `${x}px`;
-    ball.style.top = `-60px`; // чуть выше экрана
+  // Создаем грани цилиндра с цифрами
+  numbers.forEach((num, i) => {
+    const face = document.createElement('div');
+    face.classList.add('face');
+    face.textContent = num;
 
-    gameArea.appendChild(ball);
-
-    balls.push({el: ball, y: -60, speed: 1 + Math.random() * 2, value: number});
-
-    // Обработчик клика по шару
-    ball.addEventListener('click', () => {
-      score += number;
+    // Позиционируем грань по кругу по оси Y
+    const rotateY = i * angleStep;
+    face.style.transform = `rotateY(${rotateY}deg) translateZ(${radius}px)`;
+    
+    // Клик на грань
+    face.addEventListener('click', () => {
+      if (activeFace) activeFace.classList.remove('active');
+      face.classList.add('active');
+      activeFace = face;
+      score += num;
       scoreDisplay.textContent = `Очки: ${score}`;
-      // Анимация исчезновения
-      ball.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-      ball.style.transform = 'scale(1.5)';
-      ball.style.opacity = '0';
-      setTimeout(() => {
-        gameArea.removeChild(ball);
-        balls = balls.filter(b => b.el !== ball);
-      }, 300);
     });
-  }
 
-  // Обновляем позиции шаров
-  function update() {
-    balls.forEach(ball => {
-      ball.y += ball.speed;
-      ball.el.style.top = ball.y + 'px';
-
-      // Если шар ушёл вниз, удаляем его
-      if (ball.y > gameArea.clientHeight) {
-        gameArea.removeChild(ball.el);
-        balls = balls.filter(b => b.el !== ball);
-      }
-    });
-    requestAnimationFrame(update);
-  }
-
-  // Создаём шарики каждые 700мс
-  setInterval(createBall, 700);
-
-  update();
+    cylinder.appendChild(face);
+  });
 </script>
 
 </body>
