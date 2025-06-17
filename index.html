@@ -3,130 +3,134 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>3D Генератор случайных чисел — Куб</title>
+<title>Падающие шарики с числами</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap');
-
   body, html {
     margin: 0; padding: 0; height: 100%;
-    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    font-family: 'Montserrat', sans-serif;
+    overflow: hidden;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #fff;
+  }
+
+  #score {
+    font-size: 2rem;
+    margin: 20px 0 10px;
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  #game-area {
+    position: relative;
+    width: 100vw;
+    height: 80vh;
+    background: radial-gradient(circle at center, #9f7aea 0%, #6b46c1 80%);
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+  }
+
+  .ball {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(145deg, #f6d365, #fda085);
+    border-radius: 50%;
+    box-shadow:
+      inset 0 0 10px #fff8cc,
+      0 6px 15px rgba(253, 160, 133, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Montserrat', sans-serif;
-    user-select: none;
-    color: #eee;
-  }
-
-  .container {
-    text-align: center;
-    perspective: 800px;
-  }
-
-  h1 {
-    margin-bottom: 30px;
     font-weight: 700;
-    font-size: 2.2rem;
-  }
-
-  #cube {
-    margin: 0 auto 40px;
-    width: 150px;
-    height: 150px;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .face {
-    position: absolute;
-    width: 150px;
-    height: 150px;
-    background: linear-gradient(135deg, #49d49d, #1a7f64);
-    border: 3px solid #2b5c43;
-    border-radius: 15px;
-    line-height: 150px;
-    font-size: 4rem;
-    font-weight: 900;
-    color: #fff;
-    text-shadow: 0 0 10px #13875d;
-    box-shadow:
-      inset 0 0 20px rgba(255,255,255,0.3),
-      0 5px 15px rgba(0,0,0,0.3);
-    user-select: none;
-  }
-
-  .face1 { transform: rotateY(0deg) translateZ(75px); }
-  .face2 { transform: rotateY(90deg) translateZ(75px); }
-  .face3 { transform: rotateY(180deg) translateZ(75px); }
-  .face4 { transform: rotateY(-90deg) translateZ(75px); }
-  .face5 { transform: rotateX(90deg) translateZ(75px); }
-  .face6 { transform: rotateX(-90deg) translateZ(75px); }
-
-  button {
-    background: #49d49d;
-    color: #fff;
-    font-weight: 700;
-    font-size: 1.3rem;
-    padding: 14px 40px;
-    border: none;
-    border-radius: 14px;
+    font-size: 1.5rem;
+    color: #4a2c00;
     cursor: pointer;
-    box-shadow: 0 8px 20px rgba(73, 212, 157, 0.5);
-    transition: background 0.3s ease, transform 0.2s ease;
+    user-select: none;
+    transition: transform 0.2s ease;
   }
-  button:hover {
-    background: #3abf89;
-    transform: scale(1.05);
+
+  .ball:active {
+    transform: scale(0.9);
   }
-  button:active {
-    transform: scale(0.97);
+
+  #footer {
+    margin-top: 10px;
+    font-size: 1rem;
+    color: #d1c4e9;
+    text-shadow: 0 0 4px rgba(0,0,0,0.3);
   }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>3D Генератор случайных чисел</h1>
-  <div id="cube">
-    <div class="face face1">1</div>
-    <div class="face face2">2</div>
-    <div class="face face3">3</div>
-    <div class="face face4">4</div>
-    <div class="face face5">5</div>
-    <div class="face face6">6</div>
-  </div>
-  <button id="generate">Сгенерировать</button>
-</div>
+  <div id="score">Очки: 0</div>
+  <div id="game-area"></div>
+  <div id="footer">Кликайте по падающим шарикам чтобы собирать очки!</div>
 
 <script>
-  const cube = document.getElementById('cube');
-  const faces = cube.querySelectorAll('.face');
-  const generateBtn = document.getElementById('generate');
-  
-  let rotationX = 0;
-  let rotationY = 0;
+  const gameArea = document.getElementById('game-area');
+  const scoreDisplay = document.getElementById('score');
 
-  // Обновляем цифры на гранях куба случайными числами
-  function updateFaces(min, max) {
-    faces.forEach(face => {
-      face.textContent = Math.floor(Math.random() * (max - min + 1)) + min;
+  let score = 0;
+  let balls = [];
+  let ballId = 0;
+
+  // Генерируем шарик с числом и падаем
+  function createBall() {
+    const ball = document.createElement('div');
+    ball.classList.add('ball');
+    ball.dataset.id = ballId++;
+    const number = Math.floor(Math.random() * 10) + 1;
+    ball.textContent = number;
+
+    // Начальная позиция - случайная по ширине
+    const x = Math.random() * (gameArea.clientWidth - 50);
+    ball.style.left = `${x}px`;
+    ball.style.top = `-60px`; // чуть выше экрана
+
+    gameArea.appendChild(ball);
+
+    balls.push({el: ball, y: -60, speed: 1 + Math.random() * 2, value: number});
+
+    // Обработчик клика по шару
+    ball.addEventListener('click', () => {
+      score += number;
+      scoreDisplay.textContent = `Очки: ${score}`;
+      // Анимация исчезновения
+      ball.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+      ball.style.transform = 'scale(1.5)';
+      ball.style.opacity = '0';
+      setTimeout(() => {
+        gameArea.removeChild(ball);
+        balls = balls.filter(b => b.el !== ball);
+      }, 300);
     });
   }
 
-  generateBtn.addEventListener('click', () => {
-    // Плавно вращаем куб на случайные углы
-    rotationX += 360 * (Math.random() + 1);
-    rotationY += 360 * (Math.random() + 1);
+  // Обновляем позиции шаров
+  function update() {
+    balls.forEach(ball => {
+      ball.y += ball.speed;
+      ball.el.style.top = ball.y + 'px';
 
-    cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+      // Если шар ушёл вниз, удаляем его
+      if (ball.y > gameArea.clientHeight) {
+        gameArea.removeChild(ball.el);
+        balls = balls.filter(b => b.el !== ball);
+      }
+    });
+    requestAnimationFrame(update);
+  }
 
-    // Обновляем цифры (например от 1 до 100)
-    updateFaces(1, 100);
-  });
+  // Создаём шарики каждые 700мс
+  setInterval(createBall, 700);
 
-  // Изначально заполним числами от 1 до 100
-  updateFaces(1, 100);
+  update();
 </script>
 
 </body>
