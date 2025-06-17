@@ -121,26 +121,6 @@
   const generateBtn = document.getElementById('generateBtn');
   const result = document.getElementById('result');
 
-  function typeNumberAnimation(number) {
-    const numStr = number.toString();
-    result.textContent = '';
-    let index = 0;
-
-    function typeNext() {
-      if (index < numStr.length) {
-        result.textContent += numStr[index];
-        result.classList.add('animate');
-        setTimeout(() => {
-          result.classList.remove('animate');
-          index++;
-          typeNext();
-        }, 120);
-      }
-    }
-
-    typeNext();
-  }
-
   generateBtn.addEventListener('click', () => {
     let min = parseInt(minInput.value);
     let max = parseInt(maxInput.value);
@@ -151,10 +131,23 @@
     }
 
     if (min > max) {
-      [min, max] = [max, min];
+      [min, max] = [max, min]; // поменять местами если ошиблись
     }
 
-    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-    typeNumberAnimation(randomNum);
+    // Анимация кручения цифр перед результатом
+    let iterations = 15;
+    let current = 0;
+
+    const interval = setInterval(() => {
+      const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
+      result.textContent = randomNum;
+      result.classList.add('animate');
+      setTimeout(() => result.classList.remove('animate'), 300);
+      current++;
+      if (current >= iterations) clearInterval(interval);
+    }, 50);
   });
 </script>
+
+</body>
+</html>
